@@ -50,19 +50,60 @@
         </tr>
 		<tr>
 			<td>
-				JQL       
+				JQL
 			</td>
 			<td>
 				<input id="jql" type="text" />
 			</td>
 		</tr>
 		<tr>
-		<td>
-		Project keys <br/> Comma separated
-		</td>
-		<td>
-		<input type="text" id="projects" />
-		</td>
+			<td>
+				Default display by
+			</td>
+			<td>
+				<span class="radios-displayType">
+					<span>
+						<input type="radio" name="displayType" value="project" checked> Project
+					</span>
+					<span>
+						<input type="radio" name="displayType" value="issue"> Issue
+					</span>
+				</span>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<table class="group">
+					<th>
+					Display by Project
+					</th>
+					<tr>
+						<td>
+							Project keys <br/> Comma separated
+						</td>
+						<td>
+							<textarea type="text" id="projects"></textarea>
+						</td>
+					</tr>
+				</table>
+			</td>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<table class="group">
+					<th>
+					Display by Parent Issue
+					</th>
+					<tr>
+						<td>
+							Issue (story, task etc.) keys <br/> Comma separated
+						</td>
+						<td>
+							<textarea type="text" id="issues"></textarea>
+						</td>
+					</tr>
+				</table>
+			</td>
 		</tr>
 	</table>
 

@@ -20,6 +20,7 @@ function JiraAPI(baseUrl, apiExtension, username, password, jql) {
         updateWorklog: updateWorklog,
         changeStatus: changeStatus,
         setProject: setProject,
+        setIssue: setIssue,
         getProjectStatuses: getProjectStatuses,
         getTransitions: getTransitions
     };
@@ -117,14 +118,34 @@ function JiraAPI(baseUrl, apiExtension, username, password, jql) {
 
     function setProject(projectName) {
         if (projectName != "") {
+            if (jql.match(/(parent=)/g)) {
+                jql = 'assignee=currentUser()';
+            }
+
             if (jql.match(/(project=)/g)) {
                 jql = jql.replace(/(project=\').*(\')/i, '$1' + projectName + '$2');
             }
             else {
                 if (jql != "" || jql.length < 3)
-                    jql += " and project='" + projectName + "'";
+                    jql += " and project='" + projectName + "' and not status=Done";
                 else
-                    jql += "project='" + projectName + "'";
+                    jql += "project='" + projectName + "' and not status=Done";
+            }
+        }
+    }
+    function setIssue(issueName) {
+        if (issueName != "") {
+            if (jql.match(/(project=)/g)) {
+                jql = 'assignee=currentUser()';
+            }
+            if (jql.match(/(parent=)/g)) {
+                jql = jql.replace(/(parent=\').*(\')/i, '$1' + issueName + '$2');
+            }
+            else {
+                if (jql != "" || jql.length < 3)
+                    jql += " and parent='" + issueName + "' ORDER BY cf[10003]";
+                else
+                    jql += "parent='" + issueName + "' ORDER BY cf[10003]";
             }
         }
     }

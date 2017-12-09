@@ -1,17 +1,24 @@
 <!doctype html>
 <html>
 <head>
-    <title>JIRA Time Tracker</title>
-    <link rel="stylesheet" type="text/css" href="styles\site.css" />
-    <script src="scripts\jquery-3.1.1.js"></script>
-    <script src="scripts\moment.js"></script>
-    <script src="scripts\jira-api.js"></script>
-    <script src="scripts\popup.js"></script>
+    <title>JIRA Time Tracker Plus</title>
+    <link rel="stylesheet" type="text/css" href="styles/site.css" />
+    <script src="scripts/jquery-3.1.1.js"></script>
+    <script src="scripts/moment.js"></script>
+    <script src="scripts/jira-api.js"></script>
+    <script src="scripts/popup.js"></script>
 </head>
 <body>
-    <span id="project-name">Project:</span>
-	<select id="project-names">
-	</select>
+    <span class="projects-select">
+        <span id="project-name">Project:</span>
+        <select id="project-names">
+        </select>
+    </span>
+    <span class="issues-select">
+        <span id="issue-name">Issue:</span>
+        <select id="issue-names">
+        </select>
+    </span>
 	<br />
 	<br />
     <div id="table-container">
@@ -46,9 +53,18 @@
 
     <div id="brand">
         <div id="logo">
+            <img src="images/icon48.png"/>
+            <span class="extension-name">JIRA Time Tracker Plus</span>
+        </div>
+        <div id="switch-display">
+            <div>Display by:</div>
+            <group class="inline-radio">
+                <div><input type="radio" name="displayType" value="project"><label>Project</label></div>
+                <div><input type="radio" name="displayType" value="issue"><label>Issue</label></div>
+            </group>
         </div>
         <div id="nav">
-            <a href="options.html" tabindex="1">Options</a> | <a href="https://github.com/lmaraneli/jira-time-tracker" target="_blank" tabindex="2">About</a>
+            <a href="options.html" tabindex="1">Options</a> | <a href="https://github.com/jayjaydluffy/jira-time-tracker-plus" target="_blank" tabindex="2">About</a>
         </div>
     </div>
 </body>

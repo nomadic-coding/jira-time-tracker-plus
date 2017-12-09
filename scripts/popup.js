@@ -8,6 +8,8 @@ var pageIndex = 1;
 var pageCount = 1;
 var JIRA;
 var Projects = '';
+var Issues = '';
+var DisplayType = '';
 
 Date.prototype.toDateInputValue = (function () {
     var local = new Date(this);
@@ -25,13 +27,15 @@ function onDOMContentLoaded() {
         jql: '',
         itemsOnPage: 10,
         projects: '',
-        project: ''
+        project: '',
+        issues: '',
+        issue: '',
+        displayType: ''
     },
     init);
 }
 
 function init(options) {
-
     if (!options.username) {
         return errorMessage('Missing username');
     }
@@ -44,12 +48,13 @@ function init(options) {
     if (!options.apiExtension) {
         return errorMessage('Missing API extension');
     }
+    document.querySelector('input[value="'+ options.displayType +'"][name="displayType"]').checked = true;
 
     maxResults = !options.itemsOnPage ? 10 : options.itemsOnPage;
 
     JIRA = JiraAPI(options.baseUrl, options.apiExtension, options.username, options.password, options.jql);
 
-    ShowProjectsDropDown(options.projects, options.project);
+    DisplayByDropDown(options);
 
     $('div[id=loader-container]').toggle();
 
@@ -64,7 +69,10 @@ function init(options) {
     });
 
     //get project statuses and after that load issues
-    JIRA.getProjectStatuses($('#project-names').val(), ProjectStatuesSuccess, genericResponseError);
+    if (options.displayType == 'project')
+        JIRA.getProjectStatuses($('#project-names').val(), ProjectStatuesSuccess, genericResponseError);
+    else
+        JIRA.getIssues(startAt, maxResults, onFetchSuccess, onFetchError);
 }
 
 function onFetchSuccess(response) {
@@ -92,6 +100,34 @@ function onFetchSuccess(response) {
 
     issues.forEach(function (issue) {
         getWorklog(issue.key);
+    });
+}
+
+function DisplayByDropDown(options) {
+    if (options.displayType == 'project') {
+        ShowProjectsDropDown(options.projects, options.project);
+        $('.issues-select').hide();
+    }
+    else {
+        ShowIssuesDropDown(options.issues, options.issue);
+        $('.projects-select').hide();
+    }
+    $('input[type="radio"][name="displayType"]').on('click change', function(e) {
+        chrome.storage.sync.set({
+            displayType: e.target.value
+        });
+        if (e.target.value == 'project') {
+            $('.issues-select').hide();
+            $('.projects-select').show();
+            ShowProjectsDropDown(options.projects, options.project);
+            JIRA.getProjectStatuses($('#project-names').val(), ProjectStatuesSuccess, genericResponseError);
+        }
+        else {
+            $('.projects-select').hide();
+            $('.issues-select').show();
+            ShowIssuesDropDown(options.issues, options.issue);
+            JIRA.getIssues(startAt, maxResults, onFetchSuccess, onFetchError);
+        }
     });
 }
 
@@ -426,15 +462,17 @@ function navigate(self, evt) {
 }
 
 function ShowProjectsDropDown(projects, selectedProject) {
-    var p = projects.split(',');
     var $projectsSelect = $('#project-names');
     var first;
-    $(p).each(function (index, itm) {
-        if (index == 0) first = itm;
-        itm = itm.trim();
-        var opt = buildHTML("option", null, { text: itm, value: itm });
-        opt.appendTo($projectsSelect);
-    });
+    if (!$projectsSelect.find('option').length) {
+        var p = projects.split(',');
+        $(p).each(function (index, itm) {
+            if (index == 0) first = itm;
+            itm = itm.trim();
+            var opt = buildHTML("option", null, { text: itm, value: itm });
+            opt.appendTo($projectsSelect);
+        });
+    }
 
     var val = "";
     if (selectedProject != null && selectedProject != "") {
@@ -448,6 +486,32 @@ function ShowProjectsDropDown(projects, selectedProject) {
     $projectsSelect.val(val);
     $projectsSelect.change(ProjectSelectChange);
 }
+function ShowIssuesDropDown(issues, selectedIssues) {
+    var $issuesSelect = $('#issue-names');
+    var first;
+    if (!$issuesSelect.find("option").length) {
+        var p = issues.split(',');
+        var first;
+        $(p).each(function (index, itm) {
+            if (index == 0) first = itm;
+            itm = itm.trim();
+            var opt = buildHTML("option", null, { text: itm, value: itm });
+            opt.appendTo($issuesSelect);
+        });
+    }
+
+    var val = "";
+    if (selectedIssues != null && selectedIssues != "") {
+        val = selectedIssues;
+    }
+    else {
+        val = first;
+    }
+
+    JIRA.setIssue(val);
+    $issuesSelect.val(val);
+    $issuesSelect.change(IssueSelectChange);
+}
 
 function ProjectSelectChange(evt) {
     var pname = $(this).val();
@@ -458,6 +522,17 @@ function ProjectSelectChange(evt) {
 
     JIRA.setProject(pname);
     JIRA.getProjectStatuses(pname, ProjectStatuesSuccess, genericResponseError);
+}
+
+function IssueSelectChange(evt) {
+    var iname = $(this).val();
+
+    chrome.storage.sync.set({
+        issue: iname
+    });
+
+    JIRA.setIssue(iname);
+    JIRA.getIssues(startAt, maxResults, onFetchSuccess, onFetchError);
 }
 
 function ProjectStatuesSuccess(data) {
