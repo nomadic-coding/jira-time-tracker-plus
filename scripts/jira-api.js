@@ -62,7 +62,7 @@ function JiraAPI(baseUrl, apiExtension, username, password, jql) {
         var options = {
             type: 'POST',
             data: JSON.stringify({
-                "started": moment(date).format('YYYY-MM-DDT' + moment().format('HH:mm:ss.SSS') + 'ZZ'),
+                "started": moment.utc(date).format('YYYY-MM-DDT' + moment().format('HH:mm:ss.SSS') + 'ZZ'),
                 "timeSpent": timeSpent,
                 "comment": comment
             }),
